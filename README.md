@@ -101,3 +101,43 @@ UNCONN 0      0                                    [::]:123          [::]:*    u
 
 ## 5 Используя diagrams.net, создайте L3 диаграмму вашей домашней сети или любой другой сети, с которой вы работали.
 
+![image](https://user-images.githubusercontent.com/93075740/146674911-3e02d617-1b2a-4794-86a4-842f7dc03336.png)
+
+## 6 Установите Nginx, настройте в режиме балансировщика TCP или UDP
+
+	apt install nginx
+	vi /etc/nginx/modules-available/ntp
+
+```
+	stream {
+  upstream ntp_backends {
+    server 10.10.10.11:123;
+    server 10.10.10.12:123;
+  }
+  server {
+    listen 10123 udp;
+    proxy_pass ntp_backends;
+    proxy_responses 1;
+  }
+}
+```
+
+	cd /etc/nginx/modules-enabled/
+	ln -s /etc/nginx/modules-available/ntp 55-ntp.conf
+	
+## 7 Установите bird2, настройте динамический протокол маршрутизации RIP
+
+	apt install bird2
+	vi /etc/bird/bird.conf
+	
+```
+protocol rip {
+        ipv4 {
+                # Export direct, static routes and ones from RIP itself
+                import all;
+                export all;
+#               export where source ~ [ RTS_DEVICE, RTS_STATIC, RTS_RIP ];
+        };
+        interface "eth*";
+}
+```
